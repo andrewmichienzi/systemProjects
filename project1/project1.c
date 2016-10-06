@@ -28,17 +28,22 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 	int option = atoi(argv[1]);
-	int index;
-	key = removeDuplicates(argv[2]);
-	initializeEncryptArray(key, alphaBack);	
-	char decrypt[26];
-	initalizeDecryptArray(encrypt, decrypt);
-	
     	fin = fopen(argv[3], "r");
 	fout = fopen(argv[4], "w");
+	printf("Creating key and removing duplicates from key\n");
+	key = removeDuplicates(argv[2]);
+	printf("Initializing encrypt array\n");
+	initializeEncryptArray(key, alphaBack);
+	printf("Encrypt Array: %s\n",encrypt);		
 	if(option == 1){
 		processInput(fin, fout, encrypt);	
-	}else{
+	}else
+	{
+		printf("Initializing decrypt array\n");
+		char decrypt[26];
+		initalizeDecryptArray(encrypt, decrypt);
+		printf("Decrypt Array: %s\n",decrypt);		
+		printf("Processing output\n");
 		processInput(fin, fout, decrypt);
 	}
 	return(0);
@@ -98,7 +103,6 @@ void processInput(FILE *fin, FILE *fout, char substitute[])
 	int i;
 	while ( fscanf(fin, "%c", &ch) != EOF )
 	{
-		printf("%c\n", ch);
 		char c = ch;
 		i = targetFound(substitute, 26, c);	
 		if(i != 0)
