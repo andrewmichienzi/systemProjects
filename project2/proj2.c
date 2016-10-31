@@ -1,10 +1,16 @@
+
 #include "list.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+struct CommentArgs{
+	int lineComment;
+	int blockComment;
+};
 Node * processFile(Node * firstNode, FILE *fin);
-//int isIdentifier(char * word);
-//int checkForComment(char * word);
+int isIdentifier(char * delim);
+Node * addIdentifier(Node * firstNode, char * delim, int linePtr);
+
 int main(int argc, char* argv[])
 {
 	FILE *fin, *fout;
@@ -35,23 +41,22 @@ int main(int argc, char* argv[])
 
 Node * processFile(Node * firstNode, FILE *fp)
 {
+	struct CommentArgs cArgs = {0, 0};
 	char * line = NULL;
 	size_t len = 0;
 	ssize_t read;
 	int linePtr = 1;
-	Node * nextNode;
 	int firstNodeEmpty = 1;
 	while((read = getline(&line, &len, fp)) != -1)
 	{
 		//New Line
-		printf("new line\n");
+		//printf("new line\n");
 		char * delim;
-		char * newLine;
 		
 		//Remove new line from the end of line
 		int length = strlen(line);
 		if (line[length-1] == '\n'){
-			printf("Line %d has a new line\n", linePtr);
+			//printf("Line %d has a new line\n", linePtr);
 			line[length-1] = '\0';
 		}
 		delim = strtok(line, " ");
@@ -59,115 +64,110 @@ Node * processFile(Node * firstNode, FILE *fp)
 
 		while (delim != NULL)
 		{
-		if(*delim == '\n')// || strcmp(delim, "\n"))
-		{
-			//Do nothing
-		}
-		else if(firstNodeEmpty)
-		{
-		//	printf("Creating First Node\n")
-			int length = strlen(delim);
-			firstNode = createNode(delim, linePtr);
-			firstNodeEmpty = 0;
-			printf("First Node = %s\n", firstNode->identifier);
-			printf("String Length = %d\n", length);
-		}
-		else
-		{
-			//printf("Creating Node for %s\n", delim);
-			nextNode = createNode(delim, linePtr);
-			printf("Next Node = %s\n", nextNode->identifier);
-			addNodeToList(firstNode, nextNode);
-			printf("First Node = %s\n", firstNode->identifier);
-			int length = strlen(delim);
-		}
-		delim = strtok(NULL, " ");
-		/*	if(isIdentifier(delim))
+
+			if(*delim == '\n')// || strcmp(delim, "\n"))
 			{
-				//Add this shit to the firstNode
-				if(isEmpty(firstNode))
-					firstNode = createNode(delim, linePtr);	
-				else
-				{
-					Node * node = createNode(delim, linePtr);
-					addNodeToList(firstNode, node);
-				}
+				//delim just a new line
+				delim = strtok(NULL, " ");
+				continue;	
 			}
-			isComment = checkForComment(delim);			
+			
+			//Is this word in a comment?
+			
+			char * c = delim;
+			int i;
+			int wordLength = strlen(delim);
+			
+			for(i = 0;i < (wordLength - 1); i++)
+			{	
+				if(*(c+i) == '/' && *(c+i+1) == '/')
+				{
+					printf("line comment\n");
+					//Line Comment
+					cArgs.lineComment = 1;
 		
-		*/
-		
-		//delim is next word in stream
-		//If this word is a comment, check if it ends in the beginning
-		
+					if(i != 0)
+					{
+						delim[i] = '\0';
+						//memcpy(delim, delim, i-2);
+						printf("New delim = %s\n", delim);
+						if(isIdentifier(delim))
+						{
+							firstNode = addIdentifier(firstNode, delim, linePtr);
+						}
+					}
+					i = wordLength;
+				}	
+			}
+			//printf("Out of Line Comment\n");
+			//Check for line comment
+			if(cArgs.lineComment || !isIdentifier(delim))
+			{
+				printf("Is line comment of is not identifier");
+				delim = strtok(NULL, " ");
+				continue;
+			}
+			//TODO: Check for block comments
+			else
+				firstNode = addIdentifier(firstNode, delim, linePtr);		
+
 /*
-		char * letter = delim;
-		if ((*letter) == '\0')\
-		{
-			//Word doesn't exist
-			continue;
-		} 
-		if(*(letter + 1) == '\0')
-		{
-			//The word is just one letter
-			if(	
-			Node node = createNode(delim, linePtr);	
-		}*/
+			if(firstNodeEmpty)
+			{
+				//printf("Creating First Node\n")
+				int length = strlen(delim);
+				firstNode = createNode(delim, linePtr);
+				firstNodeEmpty = 0;
+				printf("First Node = %s\n", firstNode->identifier);
+				printf("String Length = %d\n", length);
+			}	
+			else
+			{
+				//printf("Creating Node for %s\n", delim);
+				nextNode = createNode(delim, linePtr);
+				printf("Next Node = %s\n", nextNode->identifier);
+				addNodeToList(firstNode, nextNode);
+				printf("First Node = %s\n", firstNode->identifier);
+				int length = strlen(delim);
+			}*/
+			delim = strtok(NULL, " ");
 		}
 		linePtr++;
+		cArgs.lineComment = 0;
 	}
 	return firstNode;
 }
-/*
-int isIdentifier(char * word)
+
+int isIdentifier(char * delim)
 {
-	int returnVal = 0;
-	char * letter = word;
-	if(*letter == '/' && !(*endOfLine))
-	{
-		if(*(letter + 1) == '/')
-		{
-			//Comment
-			*endOfLine = 1;
-		}
-		if(*(letter + 1) == '*')
-		{
-			*isComment = 1;;
-		}
-	}
-	if(isdigit(letter))
+	//printf("isIdentifier()\n");
+	char * c = delim;
+	if(isdigit(*c))
 		return 0;
+	return 1;
 }
 
-int checkForComment(char * word)
+Node * addIdentifier(Node * firstNode, char * delim, int linePtr)
 {
-	char * letter = word;//letter == first letter in word
-	if(*letter == '/')
+	//printf("Howdy\n");
+	Node * nextNode;
+	if(isEmpty(firstNode))
 	{
-		if(*(letter + 1) == '/')
-		{
-			//Comment
-			return 1;
-		}
+		//printf("Creating First Node\n")
+		int length = strlen(delim);
+		firstNode = createNode(delim, linePtr);
+		//printf("First Node = %s\n", firstNode->identifier);
+		//printf("String Length = %d\n", length);
+	}	
+	else
+	{
+		//printf("Creating Node for %s\n", delim);
+		nextNode = createNode(delim, linePtr);
+		//printf("Next Node = %s\n", nextNode->identifier);
+		addNodeToList(firstNode, nextNode);
 	}
+	return firstNode;
 }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
