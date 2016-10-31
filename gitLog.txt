@@ -1,3 +1,0 @@
-0000000000000000000000000000000000000000 4ef34d9a067e36cbb51f4f648274099c5c1668ab michiena <michiena@mail.gvsu.edu> 1475784087 -0400	commit (initial): Finished project 1
-4ef34d9a067e36cbb51f4f648274099c5c1668ab a7f16479bc73d201abd5b417d2c00db24ec5369b michiena <michiena@mail.gvsu.edu> 1475784500 -0400	commit: Adding gitlog
-a7f16479bc73d201abd5b417d2c00db24ec5369b 03bcb3723797989e358b1f717844415f026bba61 michiena <michiena@mail.gvsu.edu> 1475785334 -0400	commit: Cleaning up code and adding out files

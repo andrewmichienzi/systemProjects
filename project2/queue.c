@@ -33,11 +33,12 @@ int addToQueue(Queue * queue, int lineNumber)
 
 void printLineNumbers(Queue * queue)
 {
-	printf("Hello there\n");
+	//printf("Hello there\n");
 	int i = 0;
+	printf("Line Numbers: ");
 	while(queue->lineNumbers[i] != -1)
 	{
-		printf("%d \n", queue->lineNumbers[i]);
+		printf("%d ", queue->lineNumbers[i]);
 		i++;
 	}
 	printf("\n");

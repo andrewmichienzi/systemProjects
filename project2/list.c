@@ -43,7 +43,7 @@ void addNodeToList(Node * node, Node * nodeToAdd)
 void printNodes(Node * node)
 {	
 	int i = 0;
-	printf("%s:\t", node->identifier);
+	printf("%s\n", node->identifier);
 //	printf("Howdy\n");
 	printLineNumbers(node->queue);
 	printf("\n"); 
@@ -51,7 +51,7 @@ void printNodes(Node * node)
 		printNodes(node->nextNode);
 }
 
-Node * createNode(char word[], int lineNumber)
+Node * createNode(char * word, int lineNumber)
 {
 	Node * node = InitNode();
 	strcpy(node->identifier, word);
@@ -79,7 +79,7 @@ int nodeCompare(Node * node1, Node * node2)
 
 int isEmpty(Node * node)
 {
-	int num = getLineNumber(node->queue, 0);
+	int num = getNumber(node->queue, 0);
 	if(num == -1)
 		return 1;
 	else
