@@ -62,7 +62,9 @@ Node * processFile(Node * firstNode, FILE *fp)
 			char * c = delim;
 			int i;
 			int wordLength = strlen(delim);
-			
+
+		
+/****** --------------------------------------Checking for Comments-------------------------------------- ****/	
 			for(i = 0;i < (wordLength - 1); i++)
 			{	
 				if(cArgs.blockComment)
@@ -139,6 +141,11 @@ Node * processFile(Node * firstNode, FILE *fp)
 					}
 				}	
 			}
+
+/*-----------------------END Checking for Comments----------------------------------------*****/
+
+
+
 //			printf("Out of Line Comment\n");
 			//Check for line comment
 			if(cArgs.lineComment || !isIdentifier(delim) || cArgs.blockComment)
