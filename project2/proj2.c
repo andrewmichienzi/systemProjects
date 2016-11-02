@@ -76,7 +76,7 @@ Node * processFile(Node * firstNode, FILE *fp)
 						if((i+2) != wordLength) //block comment is NOT at the end of the word
 						{
 							delim = (delim + i + 2);
-							printf("\n\nnew delim == %s\n\n", delim);
+							printf("\n\nnew delim == %s %c\n\n", delim, delim[0]);
 						}
 						else
 						{
@@ -125,13 +125,16 @@ Node * processFile(Node * firstNode, FILE *fp)
 							cArgs.blockComment = 1;
 							if(i != 0)
 							{
-								delim[i] = '\0';
-								if(isIdentifier(delim))
+								char * tempWord = delim;
+								tempWord[i]='\0';
+								//delim = (delim + i + 2);
+								//wordLength = strlen(delim);
+								printf("\n\nnew tempWord == %s\n\n", tempWord);
+								if(isIdentifier(tempWord))
 								{
-									firstNode = addIdentifier(firstNode, delim, linePtr);
+									firstNode = addIdentifier(firstNode, tempWord, linePtr);
 								}
 							}
-						i = wordLength;
 						}
 					}
 				}	
