@@ -10,6 +10,8 @@ struct CommentArgs{
 Node * processFile(Node * firstNode, FILE *fin);
 int isIdentifier(char * delim);
 Node * addIdentifier(Node * firstNode, char * delim, int linePtr);
+void removeSpecials(char * line);
+int isInArray(char * c, char specials[], int specialLen);
 
 int main(int argc, char* argv[])
 {
@@ -19,10 +21,10 @@ int main(int argc, char* argv[])
 
 	fin = fopen(argv[1], "r");
 	Node * firstNode = InitNode();	
-//	printf("First Node Made\n");
 	firstNode = processFile(firstNode, fin);	
-//	printf("First Node = %s\n", firstNode->identifier);
-	printNodes(firstNode);
+	fout = fopen(argv[2], "w");
+	printNodes(firstNode, fout);
+	
 	return 0;	
 }
 
@@ -37,22 +39,22 @@ Node * processFile(Node * firstNode, FILE *fp)
 	while((read = getline(&line, &len, fp)) != -1)
 	{
 		//New Line
-		//printf("new line\n");
 		char * delim;
 		
 		//Remove new line from the end of line
 		int length = strlen(line);
 		if (line[length-1] == '\n'){
-			//printf("Line %d has a new line\n", linePtr);
 			line[length-1] = '\0';
 		}
+		
+		removeSpecials(line);
 		delim = strtok(line, " ");
 		
 
 		while (delim != NULL)
 		{
 
-			if(*delim == '\n')// || strcmp(delim, "\n"))
+			if(*delim == '\n')
 			{
 				//delim just a new line
 				delim = strtok(NULL, " ");
@@ -70,7 +72,6 @@ Node * processFile(Node * firstNode, FILE *fp)
 				if(cArgs.blockComment)
 				{
 					//look for ending block comment
-					printf("%c and %c\n", *(c+i), *(c+i+1));
 					if(*(c+i) == '*' && *(c+i+1) == '/')
 					{
 						printf("In block comment\n");
@@ -78,18 +79,13 @@ Node * processFile(Node * firstNode, FILE *fp)
 						if((i+2) != wordLength) //block comment is NOT at the end of the word
 						{
 							delim = (delim + i + 2);
-							printf("\n\nnew delim == %s %c\n\n", delim, delim[0]);
 						}
 						else
 						{
-							printf("Hey derr\n");
 							delim = strtok(NULL, " ");
-//							printf("Hello\n\n");
 						} 
-//						printf("Yo\n\n");
 						c = delim;
 						i=0;
-//						printf("Yo\n\n");
 						if(delim == NULL){
 							wordLength = -1;
 							continue;
@@ -103,14 +99,12 @@ Node * processFile(Node * firstNode, FILE *fp)
 				{
 					if(*(c+i) == '/' && *(c+i+1) == '/')
 					{
-//						printf("line comment\n");
 						//Line Comment
 						cArgs.lineComment = 1;
 			
 						if(i != 0)
 						{
 							delim[i] = '\0';
-//							printf("New delim = %s\n", delim);
 							if(isIdentifier(delim))
 							{
 								firstNode = addIdentifier(firstNode, delim, linePtr);
@@ -129,8 +123,6 @@ Node * processFile(Node * firstNode, FILE *fp)
 							{
 								char * tempWord = delim;
 								tempWord[i]='\0';
-								//delim = (delim + i + 2);
-								//wordLength = strlen(delim);
 								printf("\n\nnew tempWord == %s\n\n", tempWord);
 								if(isIdentifier(tempWord))
 								{
@@ -146,15 +138,12 @@ Node * processFile(Node * firstNode, FILE *fp)
 
 
 
-//			printf("Out of Line Comment\n");
 			//Check for line comment
 			if(cArgs.lineComment || !isIdentifier(delim) || cArgs.blockComment)
 			{
-//				printf("Is line comment or is not identifier");
 				delim = strtok(NULL, " ");
 				continue;
 			}
-			//TODO: Check for block comments
 			else
 				firstNode = addIdentifier(firstNode, delim, linePtr);		
 
@@ -168,7 +157,6 @@ Node * processFile(Node * firstNode, FILE *fp)
 
 int isIdentifier(char * delim)
 {
-	//printf("isIdentifier()\n");
 	if(delim == NULL)
 		return 0;
 	char * c = delim;
@@ -179,25 +167,44 @@ int isIdentifier(char * delim)
 
 Node * addIdentifier(Node * firstNode, char * delim, int linePtr)
 {
-	//printf("Howdy\n");
 	Node * nextNode;
 	if(isEmpty(firstNode))
 	{
-		//printf("Creating First Node\n")
 		int length = strlen(delim);
 		firstNode = createNode(delim, linePtr);
-		//printf("First Node = %s\n", firstNode->identifier);
-		//printf("String Length = %d\n", length);
 	}	
 	else
 	{
-		//printf("Creating Node for %s\n", delim);
 		nextNode = createNode(delim, linePtr);
-		//printf("Next Node = %s\n", nextNode->identifier);
 		addNodeToList(firstNode, nextNode);
 	}
 	return firstNode;
 }
 
+int isInArray(char * c, char specials[], int specialLen)
+{
+	int i;
+	for(i = 0; i < specialLen; i++)
+	{
+		if(*c == specials[i])
+			return 1;
+	}
+	return 0;
+}
 
+void removeSpecials(char * line)
+{
+	int specialLen = 14;
+	char specials[14] = {'.', '"', '<', '>', '#', '=', '+', '-', ';', '(', ')', '!', '|', '&'};
+	char * c = line;
+	int len = strlen(line);
+	int i;
+	for(i = 0; i < len; i++)
+	{
+		if(isInArray(c, specials, specialLen))
+		{
+			*(line + i) = ' ';
+		}
+	} 
+}
 

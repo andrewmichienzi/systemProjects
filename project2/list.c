@@ -40,15 +40,14 @@ void addNodeToList(Node * node, Node * nodeToAdd)
 		addNodeToList(node->nextNode, nodeToAdd);
 }
 
-void printNodes(Node * node)
+void printNodes(Node * node, FILE * fout)
 {	
 	int i = 0;
-	printf("%s\n", node->identifier);
-//	printf("Howdy\n");
-	printLineNumbers(node->queue);
-	printf("\n"); 
+	fprintf(fout, "%s\n", node->identifier);
+	printLineNumbers(node->queue, fout);
+	fprintf(fout, "\n"); 
 	if(node->nextNode != NULL)
-		printNodes(node->nextNode);
+		printNodes(node->nextNode, fout);
 }
 
 Node * createNode(char * word, int lineNumber)

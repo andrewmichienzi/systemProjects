@@ -1,4 +1,5 @@
 #include "queue.h"
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 Queue * InitQueue()
@@ -31,17 +32,17 @@ int addToQueue(Queue * queue, int lineNumber)
 	return i;
 }
 
-void printLineNumbers(Queue * queue)
+void printLineNumbers(Queue * queue, FILE * fout)
 {
 	//printf("Hello there\n");
 	int i = 0;
-	printf("Line Numbers: ");
+	fprintf(fout, "Line Numbers: ");
 	while(queue->lineNumbers[i] != -1)
 	{
-		printf("%d ", queue->lineNumbers[i]);
+		fprintf(fout, "%d ", queue->lineNumbers[i]);
 		i++;
 	}
-	printf("\n");
+	fprintf(fout,"\n");
 }
 
 int getNumber(Queue * queue, int i)

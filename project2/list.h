@@ -1,4 +1,5 @@
 #include "queue.h"
+#include <stdio.h>
 #define SIZE 100
 typedef struct Node {
 	Queue * queue;
@@ -10,7 +11,7 @@ typedef struct Node {
 Node * InitNode();
 Node * InitNodeWithArgs(int isComment);
 void addNodeToList(Node * node, Node * nodeToAdd);
-void printNodes(Node * node);
+void printNodes(Node * node, FILE * fout);
 Node * createNode(char word[], int lineNumber);
 int checkIfNodeExists(Node * node, Node * nodeToAdd);
 int isEmpty(Node * node);
