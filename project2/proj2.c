@@ -19,23 +19,10 @@ int main(int argc, char* argv[])
 
 	fin = fopen(argv[1], "r");
 	Node * firstNode = InitNode();	
-	printf("First Node Made\n");
+//	printf("First Node Made\n");
 	firstNode = processFile(firstNode, fin);	
-	printf("First Node = %s\n", firstNode->identifier);
+//	printf("First Node = %s\n", firstNode->identifier);
 	printNodes(firstNode);
-/*
-
-	Node * firstNode = createNode("Donkey", 14);
-	Node * nextNode = createNode("Donkey", 12);
-	addNodeToList(firstNode, nextNode);
-	nextNode = createNode("Jenga", 2);
-	addNodeToList(firstNode, nextNode);
-	nextNode = createNode("Fila", 156);
-	addNodeToList(firstNode, nextNode);
-	nextNode = createNode("Mikey", 42);
-	addNodeToList(firstNode, nextNode);
-	printNodes(firstNode);	
-*/	
 	return 0;	
 }
 
@@ -72,38 +59,88 @@ Node * processFile(Node * firstNode, FILE *fp)
 				continue;	
 			}
 			
-			//Is this word in a comment?
-			
 			char * c = delim;
 			int i;
 			int wordLength = strlen(delim);
 			
 			for(i = 0;i < (wordLength - 1); i++)
 			{	
-				if(*(c+i) == '/' && *(c+i+1) == '/')
+				if(cArgs.blockComment)
 				{
-					printf("line comment\n");
-					//Line Comment
-					cArgs.lineComment = 1;
-		
-					if(i != 0)
+					//look for ending block comment
+					printf("%c and %c\n", *(c+i), *(c+i+1));
+					if(*(c+i) == '*' && *(c+i+1) == '/')
 					{
-						delim[i] = '\0';
-						//memcpy(delim, delim, i-2);
-						printf("New delim = %s\n", delim);
-						if(isIdentifier(delim))
+						printf("In block comment\n");
+						cArgs.blockComment = 0;
+						if((i+2) != wordLength) //block comment is NOT at the end of the word
 						{
-							firstNode = addIdentifier(firstNode, delim, linePtr);
+							delim = (delim + i + 2);
+							printf("\n\nnew delim == %s\n\n", delim);
+						}
+						else
+						{
+							printf("Hey derr\n");
+							delim = strtok(NULL, " ");
+//							printf("Hello\n\n");
+						} 
+//						printf("Yo\n\n");
+						c = delim;
+						i=0;
+//						printf("Yo\n\n");
+						if(delim == NULL){
+							wordLength = -1;
+							continue;
+						}
+						else
+							wordLength = strlen(delim);	
+					}	
+				}
+
+				if(!cArgs.blockComment)
+				{
+					if(*(c+i) == '/' && *(c+i+1) == '/')
+					{
+//						printf("line comment\n");
+						//Line Comment
+						cArgs.lineComment = 1;
+			
+						if(i != 0)
+						{
+							delim[i] = '\0';
+//							printf("New delim = %s\n", delim);
+							if(isIdentifier(delim))
+							{
+								firstNode = addIdentifier(firstNode, delim, linePtr);
+							}
+						}
+						i = wordLength;
+					}
+					else
+					{
+						//Check for start of block comment
+						if(*(c+i) == '/' && *(c+i+1) == '*')
+						{
+							printf("Block comment\n");
+							cArgs.blockComment = 1;
+							if(i != 0)
+							{
+								delim[i] = '\0';
+								if(isIdentifier(delim))
+								{
+									firstNode = addIdentifier(firstNode, delim, linePtr);
+								}
+							}
+						i = wordLength;
 						}
 					}
-					i = wordLength;
 				}	
 			}
-			//printf("Out of Line Comment\n");
+//			printf("Out of Line Comment\n");
 			//Check for line comment
-			if(cArgs.lineComment || !isIdentifier(delim))
+			if(cArgs.lineComment || !isIdentifier(delim) || cArgs.blockComment)
 			{
-				printf("Is line comment of is not identifier");
+//				printf("Is line comment or is not identifier");
 				delim = strtok(NULL, " ");
 				continue;
 			}
@@ -111,25 +148,6 @@ Node * processFile(Node * firstNode, FILE *fp)
 			else
 				firstNode = addIdentifier(firstNode, delim, linePtr);		
 
-/*
-			if(firstNodeEmpty)
-			{
-				//printf("Creating First Node\n")
-				int length = strlen(delim);
-				firstNode = createNode(delim, linePtr);
-				firstNodeEmpty = 0;
-				printf("First Node = %s\n", firstNode->identifier);
-				printf("String Length = %d\n", length);
-			}	
-			else
-			{
-				//printf("Creating Node for %s\n", delim);
-				nextNode = createNode(delim, linePtr);
-				printf("Next Node = %s\n", nextNode->identifier);
-				addNodeToList(firstNode, nextNode);
-				printf("First Node = %s\n", firstNode->identifier);
-				int length = strlen(delim);
-			}*/
 			delim = strtok(NULL, " ");
 		}
 		linePtr++;
@@ -141,6 +159,8 @@ Node * processFile(Node * firstNode, FILE *fp)
 int isIdentifier(char * delim)
 {
 	//printf("isIdentifier()\n");
+	if(delim == NULL)
+		return 0;
 	char * c = delim;
 	if(isdigit(*c))
 		return 0;
