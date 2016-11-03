@@ -145,6 +145,7 @@ Node * processFile(FILE *fp)
 	return firstNode;
 }
 
+//Check if a word is an identifier
 int isIdentifier(char * delim)
 {
 	if(delim == NULL)
@@ -155,6 +156,7 @@ int isIdentifier(char * delim)
 	return 1;
 }
 
+//Add identifier to the list
 Node * addIdentifier(Node * firstNode, char * delim, int linePtr)
 {
 	Node * nextNode;
@@ -171,22 +173,24 @@ Node * addIdentifier(Node * firstNode, char * delim, int linePtr)
 	return firstNode;
 }
 
+//Doesn't work
 int isInArray(char * c, char specials[], int specialLen)
 {
 	int i;
+	int i1 = (int) *c;
 	for(i = 0; i < specialLen; i++)
 	{
-		printf("%c vs %c\n", *c, specials[i]);	
-		if(*c == specials[i])
+		int i2 = (int)specials[i];
+		if(i1 == i2)
 			return 1;
 	}
 	return 0;
 }
-
+// Doesn't work
 void removeSpecials(char * line)
 {
 	int specialLen = 15;
-	char specials[15] = {''.', '"', '<', '>', '#', '=', '+', '-', ';', '(', ')', '!', '|', '&'};
+	char specials[15] = {'.', '"', '<', '>', '#', '=', '+', '-', ';', '(', ')', '!', '|', '&'};
 	char * c = line;
 	int len = strlen(line);
 	int i;
@@ -194,7 +198,6 @@ void removeSpecials(char * line)
 	{
 		if(isInArray(c, specials, specialLen))
 		{
-		printf("hey\n");
 			*(line + i) = ' ';
 		}
 	} 
