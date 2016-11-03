@@ -36,9 +36,9 @@ Node * processFile(Node * firstNode, FILE *fp)
 	ssize_t read;
 	int linePtr = 1;
 	int firstNodeEmpty = 1;
+		//New Line
 	while((read = getline(&line, &len, fp)) != -1)
 	{
-		//New Line
 		char * delim;
 		
 		//Remove new line from the end of line
@@ -54,11 +54,10 @@ Node * processFile(Node * firstNode, FILE *fp)
 		while (delim != NULL)
 		{
 
-			if(*delim == '\n')
-			{
-				//delim just a new line
-				delim = strtok(NULL, " ");
-				continue;	
+			if(*delim == '\n') 			//if delim is just a new line
+			{	
+				delim = strtok(NULL, " "); 	//next word
+				continue; 			//Start the while loop over
 			}
 			
 			char * c = delim;
@@ -66,17 +65,18 @@ Node * processFile(Node * firstNode, FILE *fp)
 			int wordLength = strlen(delim);
 
 		
-/****** --------------------------------------Checking for Comments-------------------------------------- ****/	
-			for(i = 0;i < (wordLength - 1); i++)
+/****** --------------------------------------Checking for Comments-------------------------------------- ****/
+
+	
+			for(i = 0;i < (wordLength - 1); i++) 				//for each character in the word
 			{	
-				if(cArgs.blockComment)
+				if(cArgs.blockComment)					//if we are inside of a block comment
 				{
-					//look for ending block comment
-					if(*(c+i) == '*' && *(c+i+1) == '/')
+					if(*(c+i) == '*' && *(c+i+1) == '/')		//if there is an ending block comment
 					{
 						printf("In block comment\n");
 						cArgs.blockComment = 0;
-						if((i+2) != wordLength) //block comment is NOT at the end of the word
+						if((i+2) != wordLength) 		//if block comment is NOT at the end of the word
 						{
 							delim = (delim + i + 2);
 						}
