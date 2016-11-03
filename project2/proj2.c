@@ -7,7 +7,7 @@ struct CommentArgs{
 	int lineComment;
 	int blockComment;
 };
-Node * processFile(Node * firstNode, FILE *fin);
+Node * processFile(FILE *fin);
 int isIdentifier(char * delim);
 Node * addIdentifier(Node * firstNode, char * delim, int linePtr);
 void removeSpecials(char * line);
@@ -20,38 +20,38 @@ int main(int argc, char* argv[])
 		exit(1);
 
 	fin = fopen(argv[1], "r");
-	Node * firstNode = InitNode();	
-	firstNode = processFile(firstNode, fin);	
+	Node * firstNode;
+	firstNode = processFile(fin);	
 	fout = fopen(argv[2], "w");
 	printNodes(firstNode, fout);
 	
 	return 0;	
 }
 
-Node * processFile(Node * firstNode, FILE *fp)
+/*
+ *	Finds all valid identifiers in a file 
+ */
+Node * processFile(FILE *fp)
 {
+	Node * firstNode = InitNode();
 	struct CommentArgs cArgs = {0, 0};
 	char * line = NULL;
 	size_t len = 0;
 	ssize_t read;
 	int linePtr = 1;
-	int firstNodeEmpty = 1;
-		//New Line
-	while((read = getline(&line, &len, fp)) != -1)
+	while((read = getline(&line, &len, fp)) != -1)		//Goes through each line in the file
 	{
 		char * delim;
-		
-		//Remove new line from the end of line
 		int length = strlen(line);
-		if (line[length-1] == '\n'){
+		if (line[length-1] == '\n'){			//Remove new line from the end of line
 			line[length-1] = '\0';
 		}
 		
-		removeSpecials(line);
-		delim = strtok(line, " ");
+		removeSpecials(line);				//Remove all specials from the line 
+		delim = strtok(line, " ");			//Starts word pointer at beginning of the line
 		
 
-		while (delim != NULL)
+		while (delim != NULL)				//While there are still words in the line
 		{
 
 			if(*delim == '\n') 			//if delim is just a new line
@@ -59,7 +59,7 @@ Node * processFile(Node * firstNode, FILE *fp)
 				delim = strtok(NULL, " "); 	//next word
 				continue; 			//Start the while loop over
 			}
-			
+								
 			char * c = delim;
 			int i;
 			int wordLength = strlen(delim);
@@ -74,59 +74,57 @@ Node * processFile(Node * firstNode, FILE *fp)
 				{
 					if(*(c+i) == '*' && *(c+i+1) == '/')		//if there is an ending block comment
 					{
-						printf("In block comment\n");
-						cArgs.blockComment = 0;
+						cArgs.blockComment = 0;			//We are not in a block comment anymore
 						if((i+2) != wordLength) 		//if block comment is NOT at the end of the word
 						{
-							delim = (delim + i + 2);
+							delim = (delim + i + 2);	//Start the word after the block comment	
 						}
-						else
+						else					//If block comment IS at the end of the word
 						{
-							delim = strtok(NULL, " ");
+							delim = strtok(NULL, " ");	//Next word
 						} 
-						c = delim;
-						i=0;
-						if(delim == NULL){
-							wordLength = -1;
-							continue;
+						if(delim == NULL){			//If it's the end of the file
+							wordLength = -1;		//Skip over for loop completely		
+							continue;			//Takes care of seg faults
 						}
 						else
-							wordLength = strlen(delim);	
+							wordLength = strlen(delim);	//update word Length since we have 
+						
+						c = delim;				//starting the character at the beginning of the new word
+						i=0;					//starting the cursor at the beginning
 					}	
 				}
 
-				if(!cArgs.blockComment)
+				if(!cArgs.blockComment)					//If we are not in a block comment
 				{
-					if(*(c+i) == '/' && *(c+i+1) == '/')
+					if(*(c+i) == '/' && *(c+i+1) == '/')		//If we are at the start of a line comment
 					{
-						//Line Comment
-						cArgs.lineComment = 1;
+						cArgs.lineComment = 1;			
 			
-						if(i != 0)
+						if(i != 0)				//If the line comment isn't at the beginning of the word
 						{
-							delim[i] = '\0';
-							if(isIdentifier(delim))
+							delim[i] = '\0';		//Defining the end of the word before the line comment begins
+							if(isIdentifier(delim))		//Check if new word is an identifier
 							{
 								firstNode = addIdentifier(firstNode, delim, linePtr);
+											//add new word to the list
 							}
 						}
-						i = wordLength;
+						i = wordLength;				//get out of the for loop and disregard rest of word
 					}
-					else
-					{
-						//Check for start of block comment
-						if(*(c+i) == '/' && *(c+i+1) == '*')
+					else						//Not a line comment
+					{	
+						if(*(c+i) == '/' && *(c+i+1) == '*')	//if we point to the start of a block comment
 						{
-							printf("Block comment\n");
-							cArgs.blockComment = 1;
-							if(i != 0)
+							cArgs.blockComment = 1;		//Currently in a block comment
+							if(i != 0)			//If we are not at the beginning of the word
 							{
 								char * tempWord = delim;
-								tempWord[i]='\0';
-								printf("\n\nnew tempWord == %s\n\n", tempWord);
+								tempWord[i]='\0';	//Checking if word before the comment block is an identifier
 								if(isIdentifier(tempWord))
 								{
 									firstNode = addIdentifier(firstNode, tempWord, linePtr);
+											//Add identifier before comment to list
 								}
 							}
 						}
@@ -136,18 +134,10 @@ Node * processFile(Node * firstNode, FILE *fp)
 
 /*-----------------------END Checking for Comments----------------------------------------*****/
 
-
-
-			//Check for line comment
-			if(cArgs.lineComment || !isIdentifier(delim) || cArgs.blockComment)
-			{
-				delim = strtok(NULL, " ");
-				continue;
-			}
-			else
-				firstNode = addIdentifier(firstNode, delim, linePtr);		
-
-			delim = strtok(NULL, " ");
+			if(!cArgs.lineComment && !cArgs.blockComment && isIdentifier(delim))	//If we are an identifier and not in a comment		
+				firstNode = addIdentifier(firstNode, delim, linePtr);		//add word to the list	
+										
+			delim = strtok(NULL, " ");						//Next word
 		}
 		linePtr++;
 		cArgs.lineComment = 0;
@@ -186,6 +176,7 @@ int isInArray(char * c, char specials[], int specialLen)
 	int i;
 	for(i = 0; i < specialLen; i++)
 	{
+		printf("%c vs %c\n", *c, specials[i]);	
 		if(*c == specials[i])
 			return 1;
 	}
@@ -194,8 +185,8 @@ int isInArray(char * c, char specials[], int specialLen)
 
 void removeSpecials(char * line)
 {
-	int specialLen = 14;
-	char specials[14] = {'.', '"', '<', '>', '#', '=', '+', '-', ';', '(', ')', '!', '|', '&'};
+	int specialLen = 15;
+	char specials[15] = {''.', '"', '<', '>', '#', '=', '+', '-', ';', '(', ')', '!', '|', '&'};
 	char * c = line;
 	int len = strlen(line);
 	int i;
@@ -203,6 +194,7 @@ void removeSpecials(char * line)
 	{
 		if(isInArray(c, specials, specialLen))
 		{
+		printf("hey\n");
 			*(line + i) = ' ';
 		}
 	} 

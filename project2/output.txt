@@ -34,3 +34,15 @@ Line Numbers: 4
 shallom
 Line Numbers: 4 
 
+^#$@test1
+Line Numbers: 7 
+
+asdf@56$
+Line Numbers: 7 
+
+^test3?whoa
+Line Numbers: 7 
+
+howdy
+Line Numbers: 7 
+

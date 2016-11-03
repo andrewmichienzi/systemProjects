@@ -2,3 +2,6 @@ This is going to be used
 to test
 my/*howdy*/project 2 
 Hi my 4name is Andrew shallom// This should not be in the list
+
+
+^#$@test1 asdf@56$ ^test3?whoa howdy
