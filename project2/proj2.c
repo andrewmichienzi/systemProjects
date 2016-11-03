@@ -12,6 +12,7 @@ int isIdentifier(char * delim);
 Node * addIdentifier(Node * firstNode, char * delim, int linePtr);
 void removeSpecials(char * line);
 int isInArray(char * c, char specials[], int specialLen);
+void removeAs(char * delim);
 
 int main(int argc, char* argv[])
 {
@@ -153,6 +154,7 @@ int isIdentifier(char * delim)
 	char * c = delim;
 	if(isdigit(*c))
 		return 0;
+	removeAs(delim);
 	return 1;
 }
 
@@ -189,8 +191,8 @@ int isInArray(char * c, char specials[], int specialLen)
 // Doesn't work
 void removeSpecials(char * line)
 {
-	int specialLen = 15;
-	char specials[15] = {'.', '"', '<', '>', '#', '=', '+', '-', ';', '(', ')', '!', '|', '&'};
+	int specialLen = 17;
+	char specials[17] = {'}', '{', ',', '.', '"', '<', '>', '#', '=', '+', '-', ';', '(', ')', '!', '|', '&'};
 	char * c = line;
 	int len = strlen(line);
 	int i;
@@ -200,6 +202,19 @@ void removeSpecials(char * line)
 		{
 			*(line + i) = ' ';
 		}
+	c++;
 	} 
 }
 
+void removeAs(char * delim)
+{
+	char * c = delim;
+	int len = strlen(delim);
+	int i;
+	for(i = 0; i < len; i++)
+	{
+		if(*c == '*')
+			*(delim + i) = ' ';
+			
+	}
+}
